@@ -101,28 +101,34 @@ const emailSchema = new mongoose.Schema(
     },
 
     // ---- UNSUBSCRIBE CREDENTIAL ----
-    // A 256-bit random token, stored ONLY as a
-    // SHA-256 hash. Unsubscribing requires this
-    // token, so knowing an email address is not
-    // enough to unsubscribe someone.
+    // NO secret is stored in this document.
     //
-    // Hashing means a database dump cannot be
-    // replayed to unsubscribe the whole list.
+    // The unsubscribe token is DERIVED, not saved:
     //
-    // `select: false` keeps it out of every
-    // ordinary query result, so it cannot leak
-    // through the admin list by accident.
+    //   token = base64url( id + "." + version )
+    //           + "." + HMAC-SHA256(secret, thatPayload)
+    //
+    // That is required by campaign sending, which
+    // must embed a per-recipient unsubscribe link
+    // in every email. A stored hash cannot be
+    // reversed into a link, and a stored
+    // plaintext token would let anyone who reads
+    // the database unsubscribe the whole list.
+    //
+    // Deriving it means:
+    //   - nothing secret is at rest,
+    //   - a link can be regenerated at send time,
+    //   - verification recomputes and compares in
+    //     constant time.
+    //
+    // Bumping this counter invalidates every link
+    // already issued to that subscriber, which is
+    // how a re-subscribe revokes the old link.
 
-    unsubscribeTokenHash: {
-      type: String,
-      default: null,
-      select: false,
-    },
-
-    unsubscribeTokenExpiresAt: {
-      type: Date,
-      default: null,
-      select: false,
+    unsubscribeVersion: {
+      type: Number,
+      default: 1,
+      min: 1,
     },
   },
   {
@@ -135,18 +141,26 @@ const emailSchema = new mongoose.Schema(
 );
 
 
-// The `unique: true` on the email field above is
-// what actually builds the enforcing index
-// (observed as `email_1`). A second index on the
-// same key path would just be a duplicate, so it
-// is not declared again here.
-//
-// Default listing for the admin screen: newest
-// subscriptions first.
+// The admin subscriber table is always sorted by
+// newest subscription first, and it may be filtered
+// by status or by search, so this covers the
+// unfiltered sort.
 emailSchema.index(
   { subscribedAt: -1 },
   {
     name: "newsletter_subscribedAt_desc",
+  }
+);
+
+
+// Querying only active subscribers is the hot
+// path for every campaign send, so it gets its own
+// compound index instead of relying on the single
+// field index above.
+emailSchema.index(
+  { status: 1, subscribedAt: -1 },
+  {
+    name: "newsletter_status_subscribedAt",
   }
 );
 

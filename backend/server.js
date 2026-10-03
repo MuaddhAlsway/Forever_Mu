@@ -39,11 +39,15 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
 
-  // Production frontend
+  // Store frontend (production)
   "https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app",
 
-  // Optional stable production URL from env
+  // Admin frontend (production)
+  "https://admin-iota-six-18.vercel.app",
+
+  // Optional stable production URLs from env
   process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
 ].filter(Boolean);
 
 const corsOptions = {

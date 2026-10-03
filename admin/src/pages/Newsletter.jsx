@@ -10,6 +10,8 @@ import {
   toast,
 } from "react-toastify";
 
+import NewsletterCampaigns from "../components/NewsletterCampaigns.jsx";
+
 
 // =========================================
 // ICONS
@@ -103,8 +105,10 @@ function Newsletter({
   token,
 }) {
 
-  const backendUrl =
-    import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = (
+    import.meta.env.VITE_BACKEND_URL ||
+    "http://localhost:4000"
+  ).replace(/\/+$/, "");
 
   // ---- DATA ----
 
@@ -186,8 +190,7 @@ function Newsletter({
     ) => {
       try {
         const response = await axios.get(
-          backendUrl +
-            "/api/newsletter/admin/subscribers",
+          `${backendUrl}/api/newsletter/admin/subscribers`,
           {
             headers: {
               token,
@@ -483,7 +486,28 @@ function Newsletter({
 
       </div>
 
-      {/* ================= TABLE ================= */}
+      {/* ================= CAMPAIGNS =================
+          Composer and history sit above the
+          subscriber table. After a send, the parent
+          refreshes so the counts stay truthful. */}
+
+      <NewsletterCampaigns
+        token={token}
+        activeCount={stats.active}
+        onSent={() => {
+          fetchStats();
+
+          setLoadedKey(null);
+
+          fetchSubscribers(
+            page,
+            appliedSearch,
+            statusFilter
+          );
+        }}
+      />
+
+      {/* ================= SUBSCRIBER TABLE ================= */}
 
       <div className="border border-gray-200 overflow-x-auto">
 

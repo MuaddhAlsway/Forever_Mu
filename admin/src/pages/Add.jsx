@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:4000").replace(/\/+$/, "");
 
 function Add({ token }) {
   const [images, setImages] = useState([null, null, null, null]);

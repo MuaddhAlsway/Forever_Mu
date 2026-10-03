@@ -1,8 +1,21 @@
-import crypto from "node:crypto";
-
 import validator from "validator";
 
 import newsletterModel from "../models/newsletterModel.js";
+
+import {
+  buildUnsubscribeToken,
+  verifyUnsubscribeToken,
+  buildUnsubscribeUrl,
+} from "./unsubscribeToken.js";
+
+import {
+  sendEmail,
+  hasTransport,
+} from "./emailTransport.js";
+
+import {
+  renderWelcome,
+} from "./emailTemplates.js";
 
 
 // =========================================
@@ -138,33 +151,17 @@ export const validateSource = (value) => {
 // =========================================
 // UNSUBSCRIBE CREDENTIAL
 // =========================================
-// A 256-bit random token handed to the
-// subscriber. Only its SHA-256 hash is stored.
+// No token is generated or stored here.
 //
-// The token is regenerated on every subscribe,
-// which revokes any previously issued link the
-// moment someone re-subscribes.
-
-export const createUnsubscribeToken = () => {
-  const token = crypto.randomBytes(32).toString("hex");
-
-  return {
-    token,
-    hash: hashUnsubscribeToken(token),
-    expiresAt: new Date(
-      Date.now() + UNSUBSCRIBE_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
-    ),
-  };
-};
-
-export const hashUnsubscribeToken = (token) =>
-  crypto
-    .createHash("sha256")
-    .update(String(token))
-    .digest("hex");
-
-
-export const UNSUBSCRIBE_TOKEN_TTL_DAYS = 365;
+// Tokens are DERIVED on demand from the
+// subscriber id plus a version counter, signed
+// with a server-side secret. See
+// unsubscribeToken.js for the reasoning.
+//
+// Regenerating on every subscribe is what
+// revokes previously issued links: bumping the
+// version invalidates every unsubscribe URL
+// already sent to that subscriber.
 
 
 // =========================================
@@ -201,6 +198,17 @@ const isDuplicateKeyError = (error) =>
 //
 // Status is flipped instead of deleting so the
 // subscriber's history survives.
+//
+// Every path that creates or reactivates returns
+// `unsubscribeToken`, DERIVED rather than stored,
+// which the welcome email needs.
+
+const reactivateFields = ({ now, source }) => ({
+  status: "subscribed",
+  subscribedAt: now,
+  unsubscribedAt: null,
+  source,
+});
 
 export const subscribe = async ({ email, source }) => {
   const existing = await newsletterModel
@@ -217,27 +225,21 @@ export const subscribe = async ({ email, source }) => {
 
   const now = new Date();
 
-  const { token, hash, expiresAt } = createUnsubscribeToken();
-
   // ---- REACTIVATING A CANCELLED SUBSCRIPTION ----
   if (existing) {
     const reactivated = await newsletterModel
       .findOneAndUpdate(
         { email, status: "unsubscribed" },
         {
-          $set: {
-            status: "subscribed",
-            subscribedAt: now,
-            unsubscribedAt: null,
-            source,
-            unsubscribeTokenHash: hash,
-            unsubscribeTokenExpiresAt: expiresAt,
-          },
-          // firstSubscribedAt is intentionally
-          // NOT touched, so audience growth is
-          // not double counted on re-subscribe.
+          $set: reactivateFields({ now, source }),
+
+          // Bumping the version invalidates every
+          // unsubscribe link already sent to this
+          // address, so an old campaign email can
+          // no longer act on the new subscription.
+          $inc: { unsubscribeVersion: 1 },
         },
-        { new: true }
+        { returnDocument: "after" }
       )
       .lean();
 
@@ -245,7 +247,10 @@ export const subscribe = async ({ email, source }) => {
       return {
         outcome: "resubscribed",
         subscriber: reactivated,
-        unsubscribeToken: token,
+        unsubscribeToken: buildUnsubscribeToken(
+          reactivated._id,
+          reactivated.unsubscribeVersion
+        ),
       };
     }
 
@@ -269,14 +274,18 @@ export const subscribe = async ({ email, source }) => {
       firstSubscribedAt: now,
       unsubscribedAt: null,
       source,
-      unsubscribeTokenHash: hash,
-      unsubscribeTokenExpiresAt: expiresAt,
+      unsubscribeVersion: 1,
     });
+
+    const plain = created.toObject();
 
     return {
       outcome: "subscribed",
-      subscriber: created.toObject(),
-      unsubscribeToken: token,
+      subscriber: plain,
+      unsubscribeToken: buildUnsubscribeToken(
+        plain._id,
+        plain.unsubscribeVersion
+      ),
     };
   } catch (error) {
     // ---- CONCURRENT INSERT ----
@@ -300,30 +309,28 @@ export const subscribe = async ({ email, source }) => {
           .findOneAndUpdate(
             { email, status: "unsubscribed" },
             {
-              $set: {
-                status: "subscribed",
-                subscribedAt: now,
-                unsubscribedAt: null,
-                source,
-                unsubscribeTokenHash: hash,
-                unsubscribeTokenExpiresAt: expiresAt,
-              },
+              $set: reactivateFields({ now, source }),
+              $inc: { unsubscribeVersion: 1 },
             },
-            { new: true }
+            { returnDocument: "after" }
           )
           .lean();
 
+        const winner = reactivated || current;
+
         return {
           outcome: "resubscribed",
-          subscriber: reactivated || current,
-          unsubscribeToken: token,
+          subscriber: winner,
+          unsubscribeToken: buildUnsubscribeToken(
+            winner._id,
+            winner.unsubscribeVersion
+          ),
         };
       }
 
       return {
         outcome: "subscribed",
         subscriber: { email },
-        unsubscribeToken: token,
       };
     }
 
@@ -338,36 +345,55 @@ export const subscribe = async ({ email, source }) => {
 // Requires the emailed token. Knowing an email
 // address is deliberately NOT enough.
 //
-// The lookup is by token HASH, so the raw token
-// never reaches the database layer and the
-// subscriber's own address is not required to
-// find the row.
+// The token is verified by recomputing its HMAC
+// signature in constant time; the payload yields
+// the subscriber id, so the row is found without
+// the subscriber's address ever being sent back
+// by the visitor.
 
 export const unsubscribeByToken = async (token) => {
-  if (typeof token !== "string" || token.trim() === "") {
+  const invalid = {
+    ok: false,
+    reason: "invalid_token",
+    message:
+      "This unsubscribe link is not valid or has expired.",
+  };
+
+  if (
+    typeof token !== "string" ||
+    token.trim() === ""
+  ) {
     return {
-      ok: false,
-      reason: "invalid_token",
+      ...invalid,
       message: "This unsubscribe link is not valid.",
     };
   }
 
-  const hash = hashUnsubscribeToken(token.trim());
+  const verified = verifyUnsubscribeToken(
+    token.trim()
+  );
+
+  if (!verified) {
+    return invalid;
+  }
 
   const subscriber = await newsletterModel
-    .findOne({
-      unsubscribeTokenHash: hash,
-      unsubscribeTokenExpiresAt: { $gt: new Date() },
-    })
-    .select("+unsubscribeTokenHash +unsubscribeTokenExpiresAt")
+    .findById(verified.subscriberId)
     .lean();
 
   if (!subscriber) {
-    return {
-      ok: false,
-      reason: "invalid_token",
-      message: "This unsubscribe link is not valid or has expired.",
-    };
+    return invalid;
+  }
+
+  // A token issued before a version bump no longer
+  // matches, so an old campaign email cannot
+  // unsubscribe someone who has since
+  // re-subscribed.
+  if (
+    Number(subscriber.unsubscribeVersion) !==
+    Number(verified.version)
+  ) {
+    return invalid;
   }
 
   // Already cancelled: idempotent success, so a
@@ -387,13 +413,15 @@ export const unsubscribeByToken = async (token) => {
         $set: {
           status: "unsubscribed",
           unsubscribedAt: new Date(),
-          // Burn the credential so the link is
-          // single use.
-          unsubscribeTokenHash: null,
-          unsubscribeTokenExpiresAt: null,
         },
+
+        // Bumping the version revokes the link
+        // immediately, so it cannot be replayed.
+        // It is a sibling of $set, not nested
+        // inside it, or MongoDB rejects the update.
+        $inc: { unsubscribeVersion: 1 },
       },
-      { new: true }
+      { returnDocument: "after" }
     )
     .lean();
 
@@ -402,6 +430,75 @@ export const unsubscribeByToken = async (token) => {
     alreadyUnsubscribed: false,
     subscriber: updated || subscriber,
   };
+};
+
+
+// =========================================
+// WELCOME EMAIL
+// =========================================
+// Strictly optional and strictly non-blocking.
+//
+// The subscription is already saved in MongoDB
+// before this runs. A missing provider, a bounce,
+// or a timeout here can never undo the signup or
+// surface an error to the visitor, because the
+// promise is deliberately not awaited and every
+// failure is swallowed after being logged.
+//
+// Nothing here is faked: with no provider
+// configured this is a no-op, and the log says so.
+
+export const sendWelcomeEmail = async ({
+  email,
+  unsubscribeToken,
+} = {}) => {
+  // The token is checked FIRST so the reason reported
+  // is the actual cause, rather than always naming
+  // the transport.
+  if (!unsubscribeToken) {
+    return {
+      sent: false,
+      reason: "missing_token",
+    };
+  }
+
+  if (!hasTransport()) {
+    return {
+      sent: false,
+      reason: "transport_not_configured",
+    };
+  }
+
+  try {
+    const rendered = renderWelcome({
+      unsubscribeUrl: buildUnsubscribeUrl(
+        unsubscribeToken
+      ),
+    });
+
+    const result = await sendEmail({
+      to: email,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+    });
+
+    return {
+      sent: true,
+      providerMessageId:
+        result?.providerMessageId || null,
+    };
+  } catch (error) {
+    console.error(
+      "NEWSLETTER WELCOME EMAIL FAILED:",
+      error?.message || error
+    );
+
+    return {
+      sent: false,
+      reason: "send_failed",
+    };
+  }
 };
 
 
@@ -450,16 +547,14 @@ export const listSubscribers = async ({
 
   const skip = (page - 1) * limit;
 
-  const subscribers = await newsletterModel
-    .find(filter)
-    // Newest subscription first.
-    .sort({ subscribedAt: -1, _id: -1 })
-    .skip(skip)
-    .limit(limit)
-    // The stored hash and its expiry can never
-    // leave the service.
-    .select("-unsubscribeTokenHash -unsubscribeTokenExpiresAt")
-    .lean();
+  const subscribers =
+    await newsletterModel
+      .find(filter)
+      // Newest subscription first.
+      .sort({ subscribedAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
   return {
     subscribers,

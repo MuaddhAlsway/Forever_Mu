@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import { formatPrice } from "../utils/currency.js";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:4000").replace(/\/+$/, "");
 
 function List({ token }) {
   const [products, setProducts] = useState([]);

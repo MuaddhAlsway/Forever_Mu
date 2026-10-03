@@ -1,5 +1,15 @@
 import * as newsletterService from "../services/newsletterService.js";
 
+import * as campaignService from "../services/campaignService.js";
+
+import {
+  TransportNotConfiguredError,
+  isConfigured,
+  hasTransport,
+  missingConfiguration,
+  getTransportName,
+} from "../services/emailTransport.js";
+
 
 // =========================================
 // PUBLIC: SUBSCRIBE
@@ -36,6 +46,22 @@ const subscribe = async (req, res) => {
       email: check.email,
       source,
     });
+
+    // The welcome email is fire-and-forget. It is
+    // intentionally NOT awaited on the request
+    // path: the subscription is already durable in
+    // MongoDB, so a slow or failing provider must
+    // never delay or fail the visitor's signup.
+    if (result.unsubscribeToken) {
+      newsletterService
+        .sendWelcomeEmail({
+          email: check.email,
+          unsubscribeToken: result.unsubscribeToken,
+        })
+        .catch(() => {
+          // Already logged inside the service.
+        });
+    }
 
     // A friendly message per outcome. The caller
     // always learns the result; no internal state
@@ -204,9 +230,222 @@ const getStats = async (req, res) => {
 };
 
 
+// =========================================
+// ADMIN: TRANSPORT STATUS
+// =========================================
+// Lets the composer disable Send up front and name
+// the exact variables that are missing, instead of
+// letting an admin press Send and read a failure.
+
+const getTransportStatus = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    configured: isConfigured(),
+    provider: getTransportName(),
+    missing: missingConfiguration(),
+  });
+};
+
+
+// =========================================
+// ADMIN: SEND CAMPAIGN
+// =========================================
+// The request carries CONTENT ONLY.
+//
+// subject, message, ctaText, ctaUrl are read by
+// name. `emails`, `recipients`, `audience`,
+// `subscribers` or anything else in the body is
+// ignored outright, because the audience is
+// resolved by the backend from subscribers whose
+// status is "subscribed". There is no code path
+// that lets a caller choose who receives mail.
+
+const sendCampaign = async (req, res) => {
+  try {
+    const {
+      subject,
+      message,
+      ctaText,
+      ctaUrl,
+    } = req.body || {};
+
+    const result = await campaignService.sendCampaign({
+      subject,
+      message,
+      ctaText,
+      ctaUrl,
+    });
+
+    res.status(200).json({
+      success: true,
+      message:
+        result.summary.sent > 0
+          ? `Campaign sent to ${result.summary.sent} subscriber(s).`
+          : "Campaign processed.",
+      campaign: result.campaign,
+      summary: result.summary,
+    });
+  } catch (error) {
+    // An unconfigured provider is a configuration
+    // problem, not a server fault, and it is
+    // reported distinctly so the admin screen can
+    // show what to set.
+    if (
+      error instanceof TransportNotConfiguredError
+    ) {
+      return res.status(503).json({
+        success: false,
+        code: error.code,
+        message: error.message,
+        missing: missingConfiguration(),
+      });
+    }
+
+    // Validation and audience problems are the
+    // admin's to fix and carry a safe message.
+    if (error?.name === "Error" && !error.campaign) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    // A send that started and then failed reports
+    // exactly how far it got.
+    if (error?.campaign) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+        campaign: error.campaign,
+        summary: error.summary,
+      });
+    }
+
+    console.error(
+      "NEWSLETTER CAMPAIGN SEND ERROR:",
+      error?.message || error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to send the campaign.",
+    });
+  }
+};
+
+
+// =========================================
+// ADMIN: CAMPAIGN HISTORY
+// =========================================
+
+const listCampaigns = async (req, res) => {
+  try {
+    const page = Math.max(
+      1,
+      Number.parseInt(req.query?.page, 10) || 1
+    );
+
+    const limit = Math.min(
+      50,
+      Math.max(
+        1,
+        Number.parseInt(req.query?.limit, 10) || 20
+      )
+    );
+
+    const result = await campaignService.listCampaigns(
+      {
+        page,
+        limit,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      campaigns: result.campaigns,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    });
+  } catch (error) {
+    console.error(
+      "NEWSLETTER CAMPAIGN LIST ERROR:",
+      error?.message || error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to load campaigns.",
+    });
+  }
+};
+
+
+// =========================================
+// ADMIN: PER-RECIPIENT RESULTS
+// =========================================
+
+const getCampaignDeliveries = async (req, res) => {
+  try {
+    const page = Math.max(
+      1,
+      Number.parseInt(req.query?.page, 10) || 1
+    );
+
+    const limit = Math.min(
+      200,
+      Math.max(
+        1,
+        Number.parseInt(req.query?.limit, 10) || 50
+      )
+    );
+
+    const result =
+      await campaignService.getCampaignDeliveries({
+        campaignId: req.params?.campaignId,
+        page,
+        limit,
+        status: req.query?.status,
+      });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Campaign not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      campaign: result.campaign,
+      deliveries: result.deliveries,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    });
+  } catch (error) {
+    console.error(
+      "NEWSLETTER DELIVERY LIST ERROR:",
+      error?.message || error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to load delivery results.",
+    });
+  }
+};
+
+
 export {
   subscribe,
   unsubscribe,
   listSubscribers,
   getStats,
+  sendCampaign,
+  listCampaigns,
+  getCampaignDeliveries,
+  getTransportStatus,
 };

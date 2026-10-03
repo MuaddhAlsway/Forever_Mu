@@ -17,6 +17,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Order from "./pages/Order";
 import Profile from "./pages/Profile";
+import NewsletterUnsubscribe from "./pages/NewsletterUnsubscribe";
 import PlaceOrder from "./pages/PlaceOrder";
 import Product from "./pages/Product";
 import TrackOrder from "./pages/TrackOrder";
@@ -118,6 +119,17 @@ function App() {
         <Route
           path="/contact"
           element={<Contact />}
+        />
+
+        {/* ============ NEWSLETTER UNSUBSCRIBE ============
+            Destination of the unsubscribe link inside
+            every newsletter email. Rendered outside
+            the footer wrapper because it is a
+            standalone confirmation page. */}
+
+        <Route
+          path="/newsletter/unsubscribe"
+          element={<NewsletterUnsubscribe />}
         />
 
         {/* ============ STRIPE REDIRECTS ============ */}
