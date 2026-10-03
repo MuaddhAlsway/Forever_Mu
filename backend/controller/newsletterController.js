@@ -241,8 +241,11 @@ const getTransportStatus = async (req, res) => {
   res.status(200).json({
     success: true,
     configured: isConfigured(),
+    canSend: hasTransport(),
     provider: getTransportName(),
-    missing: missingConfiguration(),
+    missing: isConfigured()
+      ? []
+      : missingConfiguration(),
   });
 };
 
