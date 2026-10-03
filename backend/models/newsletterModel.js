@@ -135,19 +135,12 @@ const emailSchema = new mongoose.Schema(
 );
 
 
-// Case-insensitive uniqueness. The `unique`
-// flag above already builds one index, but a
-// partial unique index on the normalized value
-// is the actual guarantee that two spellings of
-// the same address can never coexist.
-emailSchema.index(
-  { email: 1 },
-  {
-    unique: true,
-    name: "newsletter_email_unique",
-  }
-);
-
+// The `unique: true` on the email field above is
+// what actually builds the enforcing index
+// (observed as `email_1`). A second index on the
+// same key path would just be a duplicate, so it
+// is not declared again here.
+//
 // Default listing for the admin screen: newest
 // subscriptions first.
 emailSchema.index(

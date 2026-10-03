@@ -1,4 +1,4 @@
-import {
+﻿import {
   useCallback,
   useEffect,
   useState,
@@ -45,23 +45,6 @@ const RefreshIcon = () => (
 );
 
 
-const ChevronIcon = ({
-  open = false,
-}) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    className={`w-4 h-4 transition-transform ${
-      open ? "rotate-180" : ""
-    }`}
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-);
-
-
 const MailIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -93,13 +76,13 @@ const MailIcon = () => (
 
 const formatDate = (value) => {
   if (!value) {
-    return "—";
+    return "â€”";
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "â€”";
   }
 
   return date.toLocaleString(undefined, {
@@ -137,9 +120,6 @@ function Newsletter({
 
   // ---- UI STATE ----
 
-  const [loading, setLoading] =
-    useState(true);
-
   const [search, setSearch] =
     useState("");
 
@@ -165,6 +145,23 @@ function Newsletter({
 
   const limit = 20;
 
+  // Identifies which query is currently on
+  // screen. The spinner is derived from this key
+  // instead of being stored as its own boolean,
+  // so the effect below never has to call
+  // setState synchronously.
+
+  const queryKey = [
+    page,
+    appliedSearch,
+    statusFilter,
+  ].join("|");
+
+  const [loadedKey, setLoadedKey] =
+    useState(null);
+
+  const loading = loadedKey !== queryKey;
+
 
   // =========================================
   // FETCH SUBSCRIBERS
@@ -173,16 +170,21 @@ function Newsletter({
   // MongoDB through the API. The browser only
   // ever holds the current page, so the table
   // stays fast at any list size.
+  //
+  // The network call and the state updates are
+  // deliberately separate: `requestSubscribers`
+  // owns the try/catch and touches no React
+  // state, while `fetchSubscribers` only writes
+  // state after an await. That keeps every state
+  // update off the synchronous path.
 
-  const fetchSubscribers =
-    useCallback(async ({
-      pageToFetch = 1,
-      searchTerm = "",
-      status = "all",
-    } = {}) => {
+  const requestSubscribers =
+    useCallback(async (
+      pageToFetch,
+      searchTerm,
+      status,
+    ) => {
       try {
-        setLoading(true);
-
         const response = await axios.get(
           backendUrl +
             "/api/newsletter/admin/subscribers",
@@ -203,53 +205,78 @@ function Newsletter({
           }
         );
 
-        const data = response.data || {};
-
-        // adminAuth answers with HTTP 200 and
-        // success:false, so the payload has to be
-        // checked rather than the status code.
-        if (!data.success) {
-          setSubscribers([]);
-          setTotal(0);
-          setTotalPages(1);
-
-          toast.error(
-            data.message ||
-              "Failed to load subscribers"
-          );
-
-          return;
-        }
-
-        setSubscribers(
-          data.subscribers || []
-        );
-
-        setTotal(data.total || 0);
-
-        setTotalPages(data.totalPages || 1);
-
-        // A page beyond the end after deleting or
-        // filtering snaps back to a valid page.
-        if (
-          pageToFetch > 1 &&
-          (data.subscribers || []).length === 0
-        ) {
-          setPage(1);
-        }
+        return {
+          ok: true,
+          data: response.data || {},
+        };
       } catch (error) {
+        return {
+          ok: false,
+          error,
+        };
+      }
+    }, [backendUrl, token]);
+
+
+  const fetchSubscribers =
+    useCallback(async (
+      pageToFetch = 1,
+      searchTerm = "",
+      status = "all",
+    ) => {
+      // Identifies the query this request
+      // resolves, so the spinner clears only
+      // once the CURRENT query has landed. A
+      // slower earlier request cannot mark a
+      // newer query as loaded.
+      const key = [
+        pageToFetch,
+        searchTerm,
+        status,
+      ].join("|");
+
+      const result = await requestSubscribers(
+        pageToFetch,
+        searchTerm,
+        status
+      );
+
+      setLoadedKey(key);
+
+      const data = result.ok ? result.data : null;
+
+      // adminAuth answers with HTTP 200 and
+      // success:false, so the payload has to be
+      // checked rather than the status code.
+      if (!result.ok || !data?.success) {
         setSubscribers([]);
         setTotal(0);
         setTotalPages(1);
 
         toast.error(
-          error?.response?.data?.message ||
+          result.error?.response?.data?.message ||
+            data?.message ||
             "Failed to load subscribers"
         );
-      } finally {
-        setLoading(false);
+
+        return;
       }
-    }, [backendUrl, token]);
+
+      setSubscribers(data.subscribers || []);
+
+      setTotal(data.total || 0);
+
+      setTotalPages(data.totalPages || 1);
+
+      // A page beyond the end after deleting or
+      // filtering snaps back to a valid page.
+      if (
+        pageToFetch > 1 &&
+        (data.subscribers || []).length === 0
+      ) {
+        setPage(1);
+      }
+    }, [requestSubscribers]);
 
 
   // ---- STATS ----
@@ -282,12 +309,20 @@ function Newsletter({
   // EFFECTS
   // =========================================
 
+  // Loads whichever query is currently active.
+  // `page` is a dependency, so Next and Previous
+  // actually re-fetch the new page instead of
+  // only changing the label.
+
   useEffect(() => {
-    fetchSubscribers({
-      pageToFetch: 1,
-      searchTerm: appliedSearch,
-      status: statusFilter,
-    });
+    // Every setState inside fetchSubscribers happens
+    // after an `await`, so this cannot cascade a
+    // render. The rule cannot see through the
+    // useCallback boundary, and the same
+    // fetch-on-mount pattern is already present in
+    // List.jsx and Orders.jsx.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSubscribers(page, appliedSearch, statusFilter);
 
     fetchStats();
   }, [
@@ -295,6 +330,7 @@ function Newsletter({
     fetchStats,
     appliedSearch,
     statusFilter,
+    page,
   ]);
 
   // Debounce keystrokes so a search is one
@@ -310,12 +346,15 @@ function Newsletter({
   }, [search]);
 
 
+  // A manual refresh must re-run even when the
+  // query key has not changed, so the loaded
+  // marker is cleared first. That puts the
+  // spinner back without the effect needing to
+  // setState.
   const refresh = () => {
-    fetchSubscribers({
-      pageToFetch: page,
-      searchTerm: appliedSearch,
-      status: statusFilter,
-    });
+    setLoadedKey(null);
+
+    fetchSubscribers(page, appliedSearch, statusFilter);
 
     fetchStats();
   };
@@ -477,7 +516,7 @@ function Newsletter({
                   colSpan="4"
                   className="px-4 py-10 text-center text-gray-500"
                 >
-                  Loading subscribers…
+                  Loading subscribersâ€¦
                 </td>
               </tr>
             )}
@@ -533,7 +572,7 @@ function Newsletter({
                       ? formatDate(
                           subscriber.unsubscribedAt
                         )
-                      : "—"}
+                      : "â€”"}
                   </td>
                 </tr>
               ))}
