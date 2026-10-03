@@ -2,7 +2,27 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:4000").replace(/\/+$/, "");
+const backendUrl = (() => {
+  const rawUrl = (
+    import.meta.env.VITE_BACKEND_URL ||
+    "http://localhost:4000"
+  );
+  
+  // Trim whitespace
+  let url = rawUrl.trim();
+  
+  // Remove ALL trailing slashes
+  url = url.replace(/\/+$/, "");
+  
+  // Debug in development
+  if (import.meta.env.DEV) {
+    console.log("Backend URL normalization:");
+    console.log("  Raw:", JSON.stringify(rawUrl));
+    console.log("  Normalized:", JSON.stringify(url));
+  }
+  
+  return url;
+})();
 
 function Add({ token }) {
   const [images, setImages] = useState([null, null, null, null]);
