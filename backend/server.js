@@ -41,6 +41,7 @@ const allowedOrigins = [
 
   // Store frontend (production)
   "https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app",
+  "https://forever-frontend-alpha-mauve.vercel.app",
 
   // Admin frontend (production)
   "https://admin-iota-six-18.vercel.app",
