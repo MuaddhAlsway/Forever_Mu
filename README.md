@@ -385,4 +385,5 @@ This project is licensed under the **ISC License**.
 
 Stripe · Cloudinary · Resend · Vercel
 
-**2026**
+
+**© 2026 Muaddh Alsway**
