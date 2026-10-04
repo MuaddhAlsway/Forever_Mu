@@ -1,4 +1,4 @@
-import {
+﻿import {
   Routes,
   Route,
 } from "react-router-dom";
@@ -37,6 +37,7 @@ function App() {
 
       {/* ================= PAGES ================= */}
 
+      <ScrollToTop />
       <Routes>
 
         {/* ================= HOME ================= */}
@@ -172,3 +173,6 @@ function App() {
 }
 
 export default App;
+
+
+

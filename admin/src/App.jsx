@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -33,7 +33,8 @@ function App() {
             <Sidebar />
 
             <div className="w-[82%] px-[4%] py-8">
-              <Routes>
+              <ScrollToTop />
+            <Routes>
                 <Route
                   path="/add"
                   element={<Add token={token} />}
