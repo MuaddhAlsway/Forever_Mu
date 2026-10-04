@@ -13,7 +13,7 @@ A modern full-stack e-commerce application with a customer storefront, admin das
 ![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-[**Storefront**](https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app) · [**Admin Panel**](https://admin-iota-six-18.vercel.app) · [**Backend API**](https://forever-mu-orcin.vercel.app)
+[**Storefront**](https://forever-frontend-alpha-mauve.vercel.app/) · [**Admin Panel**](https://admin-iota-six-18.vercel.app) · [**Backend API**](https://forever-mu-lz6g.vercel.app)
 
 ---
 
@@ -337,9 +337,9 @@ npm run build
 
 ### Live Applications
 
-- **Storefront:** https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app
+- **Storefront:** https://forever-frontend-alpha-mauve.vercel.app/
 - **Admin:** https://admin-iota-six-18.vercel.app
-- **Backend API:** https://forever-mu-orcin.vercel.app
+- **Backend API:** https://forever-mu-lz6g.vercel.app
 
 ---
 
