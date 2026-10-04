@@ -6,23 +6,14 @@ A modern full-stack e-commerce application with a customer storefront, admin das
 
 [![Forever E-Commerce Portfolio Showcase](./HomePageReadme/2026%20E-Commerce%20Portfolio%20Showcase.png)](https://github.com/MuaddhAlsway/Forever_Mu/blob/main/HomePageReadme/2026%20E-Commerce%20Portfolio%20Showcase.png)
 
-[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-
-[![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-
-[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-
-[![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
-
-[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
-
-[**Storefront**](https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app) ·
-
-[**Admin Panel**](https://admin-iota-six-18.vercel.app) ·
-
-[**Backend API**](https://forever-mu-orcin.vercel.app)
+[**Storefront**](https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app) · [**Admin Panel**](https://admin-iota-six-18.vercel.app) · [**Backend API**](https://forever-mu-orcin.vercel.app)
 
 ---
 
@@ -31,10 +22,89 @@ A modern full-stack e-commerce application with a customer storefront, admin das
 **Forever** is a MERN e-commerce platform composed of three connected applications:
 
 - **Customer Storefront** — browse, search, purchase, and track products.
-
 - **Admin Dashboard** — manage products, orders, newsletter subscribers, and campaigns.
-
 - **REST API** — handles authentication, business logic, database access, payments, images, and email delivery.
+
+---
+
+## 🚀 Features
+
+### 🛍️ Customer Store
+
+- User registration and login
+- JWT authentication and authorization
+- Product catalog and product details
+- Product search and filtering
+- Shopping cart management
+- Address management
+- Cash on Delivery
+- Stripe checkout
+- Order history and tracking
+- Newsletter subscription
+- Responsive interface
+- Toast notifications
+
+### ⚙️ Admin Dashboard
+
+- Secure admin login
+- Add and remove products
+- Upload product images
+- Manage customer orders
+- Update order status
+- Manage newsletter subscribers
+- Create email campaigns
+- Send campaign emails
+
+### 🔌 Integrations
+
+- **Stripe** — online payment processing
+- **Cloudinary** — product image storage and optimization
+- **Resend** — transactional and campaign email delivery
+- **MongoDB** — application database
+- **Vercel** — frontend, admin, and backend deployment
+
+---
+
+## 🛠️ Tech Stack
+
+| Frontend | Backend | Database | Auth | Services |
+| --- | --- | --- | --- | --- |
+| ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white) | ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white) | ![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=flat-square&logo=stripe&logoColor=white) |
+| ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) | ![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white) | ![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=flat-square&logo=mongoose&logoColor=white) | ![bcrypt](https://img.shields.io/badge/bcrypt-Password_Hashing-003A70?style=flat-square) | ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white) |
+| ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white) | ![Validator](https://img.shields.io/badge/Validator-Input_Validation-2B2B2B?style=flat-square) | — | — | ![Resend](https://img.shields.io/badge/Resend-000000?style=flat-square&logo=resend&logoColor=white) |
+| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white) | ![CORS](https://img.shields.io/badge/CORS-Enabled-000000?style=flat-square) | — | — | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white) |
+| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) | ![dotenv](https://img.shields.io/badge/dotenv-ECD53F?style=flat-square&logo=dotenv&logoColor=black) | — | — | — |
+| ![React Toastify](https://img.shields.io/badge/React_Toastify-07BC0C?style=flat-square&logo=react&logoColor=white) | — | — | — | — |
+
+### Stack Overview
+
+| Layer | Technologies |
+| --- | --- |
+| **Storefront** | React, Vite, React Router, Axios, React Toastify, Tailwind CSS |
+| **Admin Panel** | React, Vite, React Router, Axios, React Toastify, Tailwind CSS |
+| **Backend API** | Node.js, Express, Mongoose, Validator, CORS, dotenv |
+| **Database** | MongoDB |
+| **Authentication** | JWT, bcrypt |
+| **Payments** | Stripe |
+| **Media** | Cloudinary |
+| **Email** | Resend |
+| **Deployment** | Vercel |
+
+---
+
+## 🧱 Architecture
+
+```text
+Customer Store ─────┐
+                    │
+Admin Dashboard ────┼──► Express REST API ───► MongoDB
+                    │           │
+                    │           ├──► Cloudinary
+                    │           ├──► Stripe
+                    │           └──► Resend
+                    │
+                    └── Axios / HTTP
+```
 
 ---
 
@@ -104,224 +174,35 @@ A modern full-stack e-commerce application with a customer storefront, admin das
 
 ---
 
-## 🚀 Features
-
-### 🛍️ Customer Store
-
-- User registration and login
-
-- JWT authentication and authorization
-
-- Product catalog and product details
-
-- Product search and filtering
-
-- Shopping cart management
-
-- Address management
-
-- Cash on Delivery
-
-- Stripe checkout
-
-- Order history and tracking
-
-- Newsletter subscription
-
-- Responsive interface
-
-- Toast notifications
-
-### ⚙️ Admin Dashboard
-
-- Secure admin login
-
-- Add and remove products
-
-- Upload product images
-
-- Manage customer orders
-
-- Update order status
-
-- Manage newsletter subscribers
-
-- Create email campaigns
-
-- Send campaign emails
-
-### 🔌 Integrations
-
-- **Stripe** — online payment processing
-
-- **Cloudinary** — product image storage and optimization
-
-- **Resend** — transactional and campaign email delivery
-
-- **MongoDB** — application database
-
-- **Vercel** — frontend, admin, and backend deployment
-
----
-
-## 🛠️ Tech Stack
-
-| **Frontend** | **Backend** | **Database** | **Authentication** | **Services & Deployment** |
-
-| :---: | :---: | :---: | :---: | :---: |
-
-| ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white) | ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) | ![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white) |
-
-| ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white) | ![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white) | ![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white) | ![bcrypt](https://img.shields.io/badge/bcrypt-003A70?style=for-the-badge) | ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white) |
-
-| ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white) | ![Validator](https://img.shields.io/badge/Validator-2B2B2B?style=for-the-badge) |  |  | ![Resend](https://img.shields.io/badge/Resend-000000?style=for-the-badge&logo=resend&logoColor=white) |
-
-| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white) | ![CORS](https://img.shields.io/badge/CORS-000000?style=for-the-badge) |  |  | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) |
-
-| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) | ![dotenv](https://img.shields.io/badge/dotenv-ECD53F?style=for-the-badge&logo=dotenv&logoColor=black) |  |  |  |
-
-| ![React Toastify](https://img.shields.io/badge/React_Toastify-07BC0C?style=for-the-badge&logo=react&logoColor=white) |  |  |  |  |
-
-### Stack Overview
-
-- **Frontend:** React, Vite, React Router, Axios, React Toastify, Tailwind CSS
-
-- **Admin Panel:** React, Vite, React Router, Axios, React Toastify, Tailwind CSS
-
-- **Backend:** Node.js, Express, Mongoose, Validator, CORS, dotenv
-
-- **Database:** MongoDB
-
-- **Authentication:** JWT + bcrypt
-
-- **Payments:** Stripe
-
-- **Media:** Cloudinary
-
-- **Email:** Resend
-
-- **Deployment:** Vercel
-
----
-
-## 🧱 Architecture
-
-```text
-
-Customer Store ─────┐
-
-                    │
-
-Admin Dashboard ────┼──► Express REST API ───► MongoDB
-
-                    │           │
-
-                    │           ├──► Cloudinary
-
-                    │           ├──► Stripe
-
-                    │           └──► Resend
-
-                    │
-
-                    └── Axios / HTTP
-
-```
-
----
-
 ## 📁 Project Structure
 
 ```text
-
-forever/
-
+Forever_Mu/
 ├── frontend/
-
-│   ├── src/
-
-│   │   ├── assets/
-
-│   │   ├── components/
-
-│   │   ├── context/
-
-│   │   ├── pages/
-
-│   │   └── App.jsx
-
-│   └── package.json
-
-│
-
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   └── App.jsx
+│   └── package.json
 ├── admin/
-
-│   ├── src/
-
-│   │   ├── assets/
-
-│   │   ├── components/
-
-│   │   ├── pages/
-
-│   │   └── App.jsx
-
-│   └── package.json
-
-│
-
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── App.jsx
+│   └── package.json
 ├── backend/
-
-│   ├── config/
-
-│   ├── controllers/
-
-│   ├── middleware/
-
-│   ├── models/
-
-│   ├── routes/
-
-│   └── server.js
-
-│
-
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   └── server.js
+├── HomePageReadme/
 ├── screenshot/
-
-│   ├── Home01.png
-
-│   ├── Home02.png
-
-│   ├── BestSeller.png
-
-│   ├── Collection.png
-
-│   ├── Cart.png
-
-│   ├── Payment.png
-
-│   ├── MyOrder.png
-
-│   ├── TrackOurOrder.png
-
-│   ├── aboutus.png
-
-│   ├── ContactUS.png
-
-│   ├── Policy&Subscirbe.png
-
-│   ├── admin01.png
-
-│   ├── admin02.png
-
-│   ├── admin03.png
-
-│   └── admin04.png
-
-│
-
 └── README.md
-
 ```
 
 ---
@@ -331,43 +212,30 @@ forever/
 ### Prerequisites
 
 - Node.js 18+
-
 - npm
-
 - MongoDB instance
-
 - Stripe account
-
 - Cloudinary account
-
 - Resend account
 
 ### Clone the Repository
 
 ```bash
-
 git clone https://github.com/MuaddhAlsway/Forever_Mu.git
-
 cd Forever_Mu
-
 ```
 
 ### Install Dependencies
 
 ```bash
-
 cd backend
-
 npm install
 
 cd ../frontend
-
 npm install
 
 cd ../admin
-
 npm install
-
 ```
 
 ---
@@ -377,47 +245,35 @@ npm install
 Create `backend/.env`:
 
 ```env
-
 MONGODB_URL=
-
 JWT_SECRET=
 
 ADMIN_EMAIL=
-
 ADMIN_PASSWORD=
 
 STRIPE_SECRET_KEY=
 
 FRONTEND_URL=
-
 ADMIN_URL=
 
 RESEND_API_KEY=
-
 RESEND_FROM=
-
 NEWSLETTER_UNSUBSCRIBE_BASE_URL=
-
 ```
 
 Create `frontend/.env`:
 
 ```env
-
 VITE_BACKEND_URL=
-
 ```
 
 Create `admin/.env`:
 
 ```env
-
 VITE_BACKEND_URL=
-
 ```
 
 > [!IMPORTANT]
-
 > Never commit `.env` files, passwords, database credentials, API keys, or other secrets to GitHub.
 
 ---
@@ -429,31 +285,22 @@ Run each application in a separate terminal.
 ### Backend
 
 ```bash
-
 cd backend
-
 npm run server
-
 ```
 
 ### Storefront
 
 ```bash
-
 cd frontend
-
 npm run dev
-
 ```
 
 ### Admin
 
 ```bash
-
 cd admin
-
 npm run dev
-
 ```
 
 ---
@@ -463,21 +310,15 @@ npm run dev
 ### Frontend
 
 ```bash
-
 cd frontend
-
 npm run build
-
 ```
 
 ### Admin
 
 ```bash
-
 cd admin
-
 npm run build
-
 ```
 
 ---
@@ -485,29 +326,19 @@ npm run build
 ## ☁️ Deployment
 
 | Application | Platform | Status |
-
 | --- | --- | --- |
-
 | Customer Storefront | Vercel | 🟢 Live |
-
 | Admin Dashboard | Vercel | 🟢 Live |
-
 | Backend API | Vercel | 🟢 Live |
-
 | Database | MongoDB | 🟢 Connected |
-
 | Images | Cloudinary | 🟢 Integrated |
-
 | Payments | Stripe | 🟢 Integrated |
-
 | Email | Resend | 🟢 Integrated |
 
 ### Live Applications
 
 - **Storefront:** https://forever-frontend-ae4yjxczz-muaddhalsways-projects.vercel.app
-
 - **Admin:** https://admin-iota-six-18.vercel.app
-
 - **Backend API:** https://forever-mu-orcin.vercel.app
 
 ---
@@ -515,19 +346,12 @@ npm run build
 ## 🔒 Security
 
 - Password hashing with bcrypt
-
 - JWT-based authentication and authorization
-
 - Protected admin operations
-
 - Input validation
-
 - CORS configuration
-
 - Environment-based secrets
-
 - Stripe-managed payment processing
-
 - Secure newsletter unsubscribe flow
 
 ---
@@ -535,27 +359,16 @@ npm run build
 ## 🗺️ Roadmap
 
 - [x] Authentication
-
 - [x] Product catalog
-
 - [x] Search and filtering
-
 - [x] Shopping cart
-
 - [x] Address management
-
 - [x] Cash on Delivery
-
 - [x] Stripe checkout
-
 - [x] Order tracking
-
 - [x] Admin dashboard
-
 - [x] Cloudinary image management
-
 - [x] Newsletter subscriptions
-
 - [x] Email campaigns
 
 ---
