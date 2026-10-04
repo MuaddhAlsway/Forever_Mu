@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import cors from "cors";
 import "dotenv/config";
 
@@ -16,6 +16,17 @@ import newsletterRouter from "./routes/newsletterRoute.js";
 const app = express();
 
 const port = process.env.PORT || 4000;
+
+// =========================================================
+// ENV VALIDATION
+// =========================================================
+
+const requiredEnv = ["JWT_SECRET", "MONGODB_URL"];
+for (const key of requiredEnv) {
+  if (!process.env[key]) {
+    console.error(`[FATAL] Missing ${key} in environment`);
+  }
+}
 
 // =========================================================
 // DATABASE
