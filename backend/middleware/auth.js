@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+﻿import jwt from "jsonwebtoken";
 
 const authUser = async (req, res, next) => {
   try {
@@ -22,7 +22,7 @@ const authUser = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error("Auth error:", error);
+    console.error("Auth error:", {name:error.name, message:error.message, stack: error.stack?.substring(0,200)});
 
     return res.status(401).json({
       success: false,

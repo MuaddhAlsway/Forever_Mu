@@ -1,4 +1,4 @@
-import userModel from "../models/userModel.js";
+﻿import userModel from "../models/userModel.js";
 
 // =========================
 // ADD PRODUCT TO CART
@@ -159,7 +159,7 @@ const getUserCart = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Get cart error:", error);
+    console.error("Get cart error:", {name:error.name, message:error.message});
 
     return res.status(500).json({
       success: false,
