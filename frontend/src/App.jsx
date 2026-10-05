@@ -24,6 +24,7 @@ import Product from "./pages/Product";
 import TrackOrder from "./pages/TrackOrder";
 import StripeSuccess from "./pages/StripeSuccess";
 import StripeCancel from "./pages/StripeCancel";
+import NotFound from "./pages/NotFound";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -147,6 +148,16 @@ function App() {
         <Route
           path="/payment/stripe/cancel"
           element={<StripeCancel />}
+        />
+
+        {/* ============ NOT FOUND ============
+            Catch-all. Must stay last: `*` matches
+            anything, so a route added below this
+            one would never be reached. */}
+
+        <Route
+          path="*"
+          element={<NotFound />}
         />
 
       </Routes>

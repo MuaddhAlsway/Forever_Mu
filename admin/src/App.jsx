@@ -12,6 +12,7 @@ import Add from "./pages/Add";
 import List from "./pages/List";
 import Orders from "./pages/Orders";
 import Newsletter from "./pages/Newsletter";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [token, setToken] = useState(
@@ -51,11 +52,22 @@ function App() {
                   element={<Orders token={token} />}
                 />
 
-                <Route
+<Route
                   path="/newsletter"
                   element={
                     <Newsletter token={token} />
                   }
+                />
+
+                {/* ============ NOT FOUND ============
+                    Catch-all, inside the admin shell.
+                    Must stay last: `*` matches
+                    anything, so a route added below
+                    this one would never be reached. */}
+
+                <Route
+                  path="*"
+                  element={<NotFound />}
                 />
               </Routes>
             </div>
